@@ -2,6 +2,7 @@
 #define UKF_H
 #include "Eigen/Dense"
 #include "measurement_package.h"
+#include "tools.h"
 #include <vector>
 
 using Eigen::MatrixXd;
@@ -28,8 +29,8 @@ public:
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
 
-  ///* time when the state is true, in us
-  long time_us_;
+  ///* previous time stamp
+  long long previous_timestamp_;
 
   ///* Process noise standard deviation longitudinal acceleration in m/s^2
   double std_a_;
@@ -61,6 +62,9 @@ public:
   ///* Augmented state dimension
   int n_aug_;
 
+  ///*set measurement dimension for radar, radar can measure r, phi, and r_dot
+  int n_z_;
+
   ///* Sigma point spreading parameter
   double lambda_;
 
@@ -70,40 +74,88 @@ public:
   ///* the current NIS for laser
   double NIS_laser_;
 
+  ///* for using helper functions
+  Tools tools;
+
+
   /**
    * Constructor
    */
   UKF();
+
 
   /**
    * Destructor
    */
   virtual ~UKF();
 
-  /**
-   * ProcessMeasurement
-   * @param meas_package The latest measurement data of either radar or laser
-   */
-  void ProcessMeasurement(MeasurementPackage meas_package);
 
   /**
-   * Prediction Predicts sigma points, the state, and the state covariance
-   * matrix
-   * @param delta_t Time between k and k+1 in s
-   */
+  * Run the whole flow of the Kalman Filter from here.
+  */
+  void ProcessMeasurement(const MeasurementPackage &measurement_pack);
+
+
+  /**
+  * Prediction Predicts sigma points, the state, and the state covariance
+  * matrix
+  * @param delta_t Time between k and k+1 in s
+  */
   void Prediction(double delta_t);
 
-  /**
-   * Updates the state and the state covariance matrix using a laser measurement
-   * @param meas_package The measurement at k+1
-   */
-  void UpdateLidar(MeasurementPackage meas_package);
 
   /**
-   * Updates the state and the state covariance matrix using a radar measurement
-   * @param meas_package The measurement at k+1
-   */
+  * Updates the state and the state covariance matrix using a laser measurement
+  * @param meas_package The measurement at k+1
+  */
+  void UpdateLidar(MeasurementPackage meas_package);
+
+
+  /**
+  * Updates the state and the state covariance matrix using a radar measurement
+  * @param meas_package The measurement at k+1
+  */
   void UpdateRadar(MeasurementPackage meas_package);
+
+
+  /**
+  * Generates sigma points for the state matrix
+  * @param Xsig_out the matrix with 2*n_x_+1 columns representing the sigma points
+  */
+  void GenerateSigmaPoints(MatrixXd* Xsig_out);
+
+
+  /**
+  * Generates augmented sigma points for the state matrix augmented with the process noise 
+  * @param Xsig_out the matrix with 2*n_aug_+1 columns representing the sigma points
+  */
+  void AugmentedSigmaPoints(MatrixXd* Xsig_out);
+
+
+  /**
+  * Predicts the transformation of sigma points
+  * @param Xsig_out the matrix with 2*n_aug_+1 columns representing the sigma points
+  */
+  void SigmaPointPrediction(MatrixXd* Xsig_out);
+
+
+  /**
+  * Predicts the the mean and covariance of the state based on augmented sigma points
+  * @param x_out the matrix with n_x_ elements
+  * @param P_out is the covariance matrix
+  */
+  void PredictMeanAndCovariance(VectorXd* x_pred, MatrixXd* P_pred);
+
+
+  /**
+  * Estimates the predicted radar measurement in ro phi ro_dot space.
+  * @param z_out the matrix with n_z_ elements representing the state
+  * @param S_out is the covariance matrix
+  */
+  void PredictRadarMeasurement(VectorXd* z_out, MatrixXd* S_out);
+
+
+  void UpdateState(VectorXd* x_out, MatrixXd* P_out);
 };
 
 #endif /* UKF_H */

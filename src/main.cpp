@@ -1,12 +1,13 @@
-
 #include <iostream>
 #include "Eigen/Dense"
 #include <vector>
 #include "ukf.h"
 #include "measurement_package.h"
+#include "ground_truth_package.h"
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
+#include "tools.h"
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -66,15 +67,20 @@ int main(int argc, char* argv[]) {
    **********************************************/
 
   vector<MeasurementPackage> measurement_pack_list;
+  vector<GroundTruthPackage> gt_pack_list;
+
   string line;
 
   // prep the measurement packages (each line represents a measurement at a
   // timestamp)
   while (getline(in_file_, line)) {
+
     string sensor_type;
     MeasurementPackage meas_package;
+    GroundTruthPackage gt_package;
     istringstream iss(line);
-    long timestamp;
+
+    long long timestamp;
 
     // reads first element from the current line
     iss >> sensor_type;
@@ -110,10 +116,28 @@ int main(int argc, char* argv[]) {
       meas_package.timestamp_ = timestamp;
       measurement_pack_list.push_back(meas_package);
     }
+
+    // read ground truth data to compare later
+    float x_gt;
+    float y_gt;
+    float vx_gt;
+    float vy_gt;
+    iss >> x_gt;
+    iss >> y_gt;
+    iss >> vx_gt;
+    iss >> vy_gt;
+    gt_package.gt_values_ = VectorXd(4);
+    gt_package.gt_values_ << x_gt, y_gt, vx_gt, vy_gt;
+    gt_pack_list.push_back(gt_package);
+
   }
 
   // Create a UKF instance
   UKF ukf;
+
+  // used to compute the RMSE later
+  vector<VectorXd> estimations;
+  vector<VectorXd> ground_truth;
 
   size_t number_of_measurements = measurement_pack_list.size();
 
@@ -133,22 +157,29 @@ int main(int argc, char* argv[]) {
     // output the measurements
     if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::LASER) {
       // output the estimation
-
-      // p1 - meas
-      out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t";
-
-      // p2 - meas
-      out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t";
+      out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t"; // p1_meas
+      out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t"; // p2_meas
     } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
       // output the estimation in the cartesian coordinates
-      float ro = measurement_pack_list[k].raw_measurements_(0);
-      float phi = measurement_pack_list[k].raw_measurements_(1);
+      double ro = measurement_pack_list[k].raw_measurements_(0);
+      double phi = measurement_pack_list[k].raw_measurements_(1);
       out_file_ << ro * cos(phi) << "\t"; // p1_meas
       out_file_ << ro * sin(phi) << "\t"; // p2_meas
     }
 
-    out_file_ << "\n";
+    // output the ground truth packages
+    out_file_ << gt_pack_list[k].gt_values_(0) << "\t";
+    out_file_ << gt_pack_list[k].gt_values_(1) << "\t";
+    out_file_ << gt_pack_list[k].gt_values_(2) << "\t";
+    out_file_ << gt_pack_list[k].gt_values_(3) << "\n";
+    //
+    estimations.push_back(ukf.x_);
+    ground_truth.push_back(gt_pack_list[k].gt_values_);
   }
+
+  // compute the accuracy (RMSE)
+  Tools tools;
+  cout << "Accuracy - RMSE:" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
 
   // close files
   if (out_file_.is_open()) {
