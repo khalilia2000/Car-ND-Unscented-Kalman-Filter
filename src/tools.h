@@ -33,7 +33,7 @@ public:
   /**
   * A helper method for calculating weights to be used for estimating mean and covariance from the sigma points
   */
-  Eigen::VectorXd CalculateWeights(int n);
+  Eigen::VectorXd CalculateWeights(int n, double lambda);
 
 };
 

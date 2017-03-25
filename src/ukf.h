@@ -63,7 +63,10 @@ public:
   int n_aug_;
 
   ///*set measurement dimension for radar, radar can measure r, phi, and r_dot
-  int n_z_;
+  int n_z_radar_;
+
+  ///*set measurement dimension for radar, radar can measure r, phi, and r_dot
+  int n_z_laser_;
 
   ///* Sigma point spreading parameter
   double lambda_;
@@ -84,16 +87,26 @@ public:
   UKF();
 
 
+
   /**
    * Destructor
    */
   virtual ~UKF();
 
 
+
+  /**
+  * First initialization
+  */
+  void InitializeByFirstMeasurement(const MeasurementPackage &measurement_pack);
+
+
+
   /**
   * Run the whole flow of the Kalman Filter from here.
   */
   void ProcessMeasurement(const MeasurementPackage &measurement_pack);
+
 
 
   /**
@@ -104,11 +117,13 @@ public:
   void Prediction(double delta_t);
 
 
+
   /**
   * Updates the state and the state covariance matrix using a laser measurement
   * @param meas_package The measurement at k+1
   */
   void UpdateLidar(MeasurementPackage meas_package);
+
 
 
   /**
@@ -118,25 +133,21 @@ public:
   void UpdateRadar(MeasurementPackage meas_package);
 
 
-  /**
-  * Generates sigma points for the state matrix
-  * @param Xsig_out the matrix with 2*n_x_+1 columns representing the sigma points
-  */
-  void GenerateSigmaPoints(MatrixXd* Xsig_out);
-
 
   /**
   * Generates augmented sigma points for the state matrix augmented with the process noise 
   * @param Xsig_out the matrix with 2*n_aug_+1 columns representing the sigma points
   */
-  void AugmentedSigmaPoints(MatrixXd* Xsig_out);
+  void GenerateAugmentedSigmaPoints(MatrixXd* Xsig_out);
+
 
 
   /**
   * Predicts the transformation of sigma points
   * @param Xsig_out the matrix with 2*n_aug_+1 columns representing the sigma points
   */
-  void SigmaPointPrediction(MatrixXd* Xsig_out);
+  void SigmaPointPrediction(MatrixXd* Xsig_out, const VectorXd& Xsig_aug, const double delta_t);
+
 
 
   /**
@@ -144,18 +155,32 @@ public:
   * @param x_out the matrix with n_x_ elements
   * @param P_out is the covariance matrix
   */
-  void PredictMeanAndCovariance(VectorXd* x_pred, MatrixXd* P_pred);
+  void PredictMeanAndCovariance(VectorXd* x_pred, MatrixXd* P_pred, const VectorXd& Xsig_pred);
+
 
 
   /**
   * Estimates the predicted radar measurement in ro phi ro_dot space.
   * @param z_out the matrix with n_z_ elements representing the state
   * @param S_out is the covariance matrix
+  * @param Zsig_out is the matrix of sigma points in measurement space
   */
-  void PredictRadarMeasurement(VectorXd* z_out, MatrixXd* S_out);
+  void PredictRadarMeasurement(VectorXd* z_out, MatrixXd* S_out, MatrixXd* Zsig_out);
 
 
-  void UpdateState(VectorXd* x_out, MatrixXd* P_out);
+
+  /**
+  * Update the state based on the current measurement and prediction
+  * @param x_out is the state vector to be updated
+  * @param P_out is the state covariance matrix to be updated
+  * @param z_pred is the predicted state in measurement space
+  * @param z_meas is the measured state in measurement space
+  * @param S is the covariance matrix of the predicted space
+  * @param Zsig is the vector of sigma points in measurement space
+  * @param z is the number of parameters in the measurement space - i.e. n_z_radar_ or n_z_laser_
+  */
+  void UpdateState(VectorXd* x_out, MatrixXd* P_out, const VectorXd& z_pred, const VectorXd& z_meas, const MatrixXd& S, const MatrixXd& Zsig, int n_z);
+
 };
 
 #endif /* UKF_H */

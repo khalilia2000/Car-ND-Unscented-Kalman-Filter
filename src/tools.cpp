@@ -28,7 +28,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
   }
 
   // accumulate squared residuals
-  for (int i = 0; i < estimations.size(); ++i) {
+  for (size_t i = 0; i < estimations.size(); ++i) {
     // initialize variables
     double px =       estimations[i](0);
     double py =       estimations[i](1);
@@ -138,12 +138,10 @@ VectorXd Tools::CalculateCartesianFromPolar(const Eigen::VectorXd& x_state) {
 * A helper method for calculating weights to be used for estimating mean and covariance from the sigma points
 * @param n: size of the weight vector - i.e. n_aug
 */
-Eigen::VectorXd CalculateWeights(int n) {
+VectorXd Tools::CalculateWeights(int n, double lambda) {
  
   //create vector for weights
-  VectorXd weights = VectorXd(2 * n + 1);
-  //initialize lambda
-  double lambda = 3 - n;
+  VectorXd weights(2 * n + 1);
 
   //set vector for weights
   double weight_0 = lambda / (lambda + n);
