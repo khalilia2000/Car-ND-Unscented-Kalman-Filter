@@ -144,6 +144,7 @@ int main(int argc, char* argv[]) {
   // start filtering from the second frame (the speed is unknown in the first
   // frame)
   for (size_t k = 0; k < number_of_measurements; ++k) {
+    std::cout << k << endl;
     // Call the UKF-based fusion
     ukf.ProcessMeasurement(measurement_pack_list[k]);
 

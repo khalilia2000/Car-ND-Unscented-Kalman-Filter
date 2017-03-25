@@ -146,7 +146,7 @@ public:
   * Predicts the transformation of sigma points
   * @param Xsig_out the matrix with 2*n_aug_+1 columns representing the sigma points
   */
-  void SigmaPointPrediction(MatrixXd* Xsig_out, const VectorXd& Xsig_aug, const double delta_t);
+  void SigmaPointPrediction(MatrixXd* Xsig_out, const MatrixXd& Xsig_aug, const double delta_t);
 
 
 
@@ -155,7 +155,7 @@ public:
   * @param x_out the matrix with n_x_ elements
   * @param P_out is the covariance matrix
   */
-  void PredictMeanAndCovariance(VectorXd* x_pred, MatrixXd* P_pred, const VectorXd& Xsig_pred);
+  void PredictMeanAndCovariance(VectorXd* x_pred, MatrixXd* P_pred);
 
 
 
