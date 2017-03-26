@@ -144,7 +144,6 @@ int main(int argc, char* argv[]) {
   // start filtering from the second frame (the speed is unknown in the first
   // frame)
   for (size_t k = 0; k < number_of_measurements; ++k) {
-    std::cout << k << endl;
     // Call the UKF-based fusion
     ukf.ProcessMeasurement(measurement_pack_list[k]);
 
@@ -169,10 +168,11 @@ int main(int argc, char* argv[]) {
     }
 
     // output the ground truth packages
-    out_file_ << gt_pack_list[k].gt_values_(0) << "\t";
-    out_file_ << gt_pack_list[k].gt_values_(1) << "\t";
-    out_file_ << gt_pack_list[k].gt_values_(2) << "\t";
-    out_file_ << gt_pack_list[k].gt_values_(3) << "\n";
+    out_file_ << gt_pack_list[k].gt_values_(0) << "\t";     //p1 - GT
+    out_file_ << gt_pack_list[k].gt_values_(1) << "\t";     //p2 - GT
+    out_file_ << gt_pack_list[k].gt_values_(2) << "\t";     //v1 - GT
+    out_file_ << gt_pack_list[k].gt_values_(3) << "\n";     //v2 - GT
+    
     //
     estimations.push_back(ukf.x_);
     ground_truth.push_back(gt_pack_list[k].gt_values_);
