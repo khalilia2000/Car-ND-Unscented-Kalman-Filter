@@ -79,6 +79,9 @@ public:
 
   ///* for using helper functions
   Tools tools;
+  
+  ///* keep track of the previous measurement
+  MeasurementPackage previous_measurement_;
 
 
   /**

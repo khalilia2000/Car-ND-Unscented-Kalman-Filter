@@ -16,10 +16,10 @@ UKF::UKF() {
   use_radar_ = true;
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 0.05; //30;
+  std_a_ = 0.5; //30;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 0.05; // 30;
+  std_yawdd_ = 0.5; // 30;
 
   // Laser measurement noise standard deviation position1 in m
   std_laspx_ = 0.15;
@@ -102,9 +102,9 @@ void UKF::InitializeByFirstMeasurement(const MeasurementPackage &measurement_pac
   P_.fill(0.0);
   P_(0, 0) = 1;
   P_(1, 1) = 1;
-  P_(2, 2) = 1000;
-  P_(3, 3) = 1000;
-  P_(4, 4) = 1000;
+  P_(2, 2) = 1;
+  P_(3, 3) = 1;
+  P_(4, 4) = 1;
 
   // done initializing
   is_initialized_ = true;
@@ -130,7 +130,18 @@ void UKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     previous_timestamp_ = measurement_pack.timestamp_;
 
     // Predict the new state based on dt - same for both laser and radar
-    Prediction(dt);
+    try {
+      Prediction(dt);
+    }
+    catch (std::range_error e) {
+      // If convariance matrix is non positive definite (because of numerical instability),
+      // restart the filter using the most recent measurement as initialiser.
+      InitializeByFirstMeasurement(previous_measurement_);
+      // Redo prediction using the current measurement
+      // We don't get exception this time, because initial P (identity) is positive definite.
+      Prediction(dt);
+    }
+   
 
     //  Update - Use the sensor type to perform the update step - Update the state and covariance matrices.
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
@@ -144,6 +155,11 @@ void UKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     }
 
   }
+
+  // set previous_measurement
+  previous_measurement_ = measurement_pack;
+
+
 }
 
 
@@ -242,7 +258,15 @@ void UKF::GenerateAugmentedSigmaPoints(MatrixXd* Xsig_out) {
   P_aug(n_x_+1, n_x_+1) = std_yawdd_*std_yawdd_;
 
   //create square root matrix
-  MatrixXd A_aug = P_aug.llt().matrixL();
+  // 1. compute the Cholesky decomposition of P_aug
+  Eigen::LLT<MatrixXd> lltOfPaug(P_aug);
+  if (lltOfPaug.info() == Eigen::NumericalIssue) {
+    // if decomposition fails, we have numerical issues - throw error
+    throw std::range_error("LLT failed");
+  }
+  // 2. get the lower triangle
+  MatrixXd A_aug = lltOfPaug.matrixL();
+
 
   //create augmented sigma points
   Xsig_aug.col(0) = x_aug;
