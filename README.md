@@ -26,4 +26,4 @@ It's been tried to stick to [Google's C++ style guide](https://google.github.io/
 
 The following image presents the results obtained on the first datafile. The ground truth values of Px and Py along with the predicted values (i.e. using UKF) and the measurement values are shown on the image. RMSE values of 0.085344, 0.0873828, 0.649494 and 0.58687 were obtained for Px, Py, Px_dot, and Py_dot.
 
-<img src="./results/results1.png" alt="Visualization of the resutls for dataset1" height =750 width=144>
+<img src="./results/results1.png" alt="Visualization of the resutls for dataset1">
