@@ -1,6 +1,4 @@
-#include <iostream>
 #include "ukf.h"
-#include "tools.h"
 
 /**
  * Initializes Unscented Kalman filter
@@ -71,6 +69,12 @@ UKF::UKF() {
   
   //prediction sigma points matrix
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
+
+  //initialize NIS laser variable
+  NIS_laser_ = 0;
+
+  //initialize NIS radar variable
+  NIS_radar_ = 0;
 
 }
 
@@ -204,6 +208,9 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   R(1, 1) = std_laspx_*std_laspy_;
   S += R;
 
+  //calculate NIS
+  NIS_laser_ = (meas_package.raw_measurements_ - z_pred).transpose() * S.inverse() * (meas_package.raw_measurements_ - z_pred);
+
   // update space
   UpdateState(&x_, &P_, z_pred, meas_package.raw_measurements_, S, Zsig, n_z_laser_);
 
@@ -222,6 +229,9 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   MatrixXd S(n_z_radar_, n_z_radar_);
   MatrixXd Zsig(n_z_radar_, 2 * n_aug_ + 1);
   PredictRadarMeasurement(&z_pred, &S, &Zsig);
+
+  //calculate NIS
+  NIS_radar_ = (meas_package.raw_measurements_ - z_pred).transpose() * S.inverse() * (meas_package.raw_measurements_ - z_pred);
 
   // update state
   UpdateState(&x_, &P_, z_pred, meas_package.raw_measurements_, S, Zsig, n_z_radar_);

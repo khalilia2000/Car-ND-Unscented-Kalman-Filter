@@ -4,9 +4,11 @@
 #include "measurement_package.h"
 #include "tools.h"
 #include <vector>
+#include <iostream>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using std::vector;
 
 class UKF {
 public:

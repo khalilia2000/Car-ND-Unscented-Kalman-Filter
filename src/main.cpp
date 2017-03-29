@@ -141,8 +141,12 @@ int main(int argc, char* argv[]) {
 
   size_t number_of_measurements = measurement_pack_list.size();
 
-  // start filtering from the second frame (the speed is unknown in the first
-  // frame)
+  ///* keep track of NIS for laser
+  vector<double> list_NIS_laser_;
+  ///* keep track of NIS for radar
+  vector<double> list_NIS_radar_;
+  
+  // start filtering from the second frame (the speed is unknown in the first frame)
   for (size_t k = 0; k < number_of_measurements; ++k) {
     // Call the UKF-based fusion
     ukf.ProcessMeasurement(measurement_pack_list[k]);
@@ -156,15 +160,23 @@ int main(int argc, char* argv[]) {
 
     // output the measurements
     if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::LASER) {
+      // add calculated NIS value to the list
+      list_NIS_laser_.push_back(ukf.NIS_laser_);
       // output the estimation
+      out_file_ << "L" << "\t";
       out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t"; // p1_meas
       out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t"; // p2_meas
+      out_file_ << ukf.NIS_laser_ << "\t"; // NIS value
     } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
+      // add calculated NIS value to the list
+      list_NIS_radar_.push_back(ukf.NIS_radar_);
       // output the estimation in the cartesian coordinates
       double ro = measurement_pack_list[k].raw_measurements_(0);
       double phi = measurement_pack_list[k].raw_measurements_(1);
+      out_file_ << "R" << "\t";
       out_file_ << ro * cos(phi) << "\t"; // p1_meas
       out_file_ << ro * sin(phi) << "\t"; // p2_meas
+      out_file_ << ukf.NIS_radar_ << "\t"; // NIS value
     }
 
     // output the ground truth packages
