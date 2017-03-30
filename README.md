@@ -24,7 +24,7 @@ It's been tried to stick to [Google's C++ style guide](https://google.github.io/
 
 ## Results for dataset #1
 
-The following image presents the results obtained on the first data file. The ground truth values of Px and Py along with the predicted values (i.e. using UKF) and the measurement values are shown on the image below. RMSE values of **0.0702229**, **0.0792156**, **0.604636** and **0.64632** were obtained for Px, Py, Px_dot, and Py_dot.
+The following images present the results obtained on the first data file. The ground truth values of Px, Py and V along with the predicted values using UKF and the measurement values are shown on the images below. NIS values for radar and laser measurements are also shown in separate plots. RMSE values of **0.0702229**, **0.0792156**, **0.604636** and **0.64632** were obtained for Px, Py, Px_dot, and Py_dot.
 
 | Position Estimates vs. Ground Truth | Velocity Estimates vs. Ground Truth | 
 |:-----------------------------------:|:-----------------------------------:|  
@@ -39,10 +39,18 @@ The following image presents the results obtained on the first data file. The gr
 
 ## Results for dataset #2
 
-The following image presents the results obtained on the second data file. The ground truth values of Px and Py along with the predicted values (i.e. using UKF) and the measurement values are shown on the image below. RMSE values of **0.181135**, **0.182171**, **0.329967** and **0.531821** were obtained for Px, Py, Px_dot, and Py_dot.
+The following images present the results obtained on the second data file. The ground truth values of Px, Py and V along with the predicted values using UKF and the measurement values are shown on the images below. NIS values for radar and laser measurements are also shown in separate plots. RMSE values of **0.197258**, **0.189033**, **0.41664** and **0.362757** were obtained for Px, Py, Px_dot, and Py_dot.
 
-<img src="./results/results2.PNG" alt="Visualization of the resutls for dataset #2">
+| Position Estimates vs. Ground Truth | Velocity Estimates vs. Ground Truth | 
+|:-----------------------------------:|:-----------------------------------:|  
+| <img src="./results/results2.PNG" alt="Visualization of the resutls for dataset #2"> | <img src="./results/results2-v.PNG" alt="Visualization of the resutls for dataset #2"> |
+
+| NIS Values for Laser | NIS Values for Radar | 
+|:--------------------:|:--------------------:|  
+| <img src="./results/results2-v-NISL.PNG" alt="Visualization of the resutls for dataset #2"> | <img src="./results/results2-v-NISR.PNG" alt="Visualization of the resutls for dataset #2"> |
+
 
 ## Other Considerations
 
-Calculation of the square root of the matrix was the tricky part. In order to avoid numerical instabilities, the suggestions provided [here](https://discussions.udacity.com/t/numerical-instability-of-the-implementation/230449) were implemented.
+- Calculation of the square root of the matrix was the tricky part. In order to avoid numerical instabilities, the suggestions provided [here](https://discussions.udacity.com/t/numerical-instability-of-the-implementation/230449) were implemented.  
+- The RMSE values can be brought down further, however not without sacrifising the NIS integrity. 
