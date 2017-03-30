@@ -53,4 +53,4 @@ The following images present the results obtained on the second data file. The g
 ## Other Considerations
 
 - Calculation of the square root of the matrix was the tricky part. In order to avoid numerical instabilities, the suggestions provided [here](https://discussions.udacity.com/t/numerical-instability-of-the-implementation/230449) were implemented.  
-- The RMSE values can be brought down further, however not without sacrifising the NIS integrity. 
+- The RMSE values can be brought down further, however not without sacrifising the integrity of the NIS distributions. 
