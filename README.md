@@ -26,7 +26,11 @@ It's been tried to stick to [Google's C++ style guide](https://google.github.io/
 
 The following image presents the results obtained on the first data file. The ground truth values of Px and Py along with the predicted values (i.e. using UKF) and the measurement values are shown on the image below. RMSE values of **0.085344**, **0.0873828**, **0.649494** and **0.58687** were obtained for Px, Py, Px_dot, and Py_dot.
 
-<img src="./results/results1.PNG" alt="Visualization of the resutls for dataset #1">
+| Position Estimates vs. Ground Truth | Velocity Estimates vs. Ground Truth | 
+|:--------------:|:-----------------------:|  
+| <img src="./results/results1.PNG" alt="Visualization of the resutls for dataset #1"> | <img src="./results/results1-v.PNG" alt="Visualization of the resutls for dataset #1"> |
+
+
 
 
 ## Results for dataset #2
