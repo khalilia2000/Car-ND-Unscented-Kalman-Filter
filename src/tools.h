@@ -36,6 +36,12 @@ public:
   */
   Eigen::VectorXd CalculateWeights(int n, double lambda);
 
+  
+  /**
+  * A helper method for calculating the percentage of the elemnets in a list that are greater than a certain threshold
+  */
+  double FractionLargerThanThreshold(const std::vector<double> &values, double threshold);
+
 };
 
 #endif /* TOOLS_H_ */

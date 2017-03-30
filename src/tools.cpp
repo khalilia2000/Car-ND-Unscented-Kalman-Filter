@@ -152,3 +152,25 @@ VectorXd Tools::CalculateWeights(int n, double lambda) {
 
   return weights;
 }
+
+
+/**
+* A helper method for calculating the percentage of the elemnets in a list that are greater than a certain threshold
+* @param values is a vector of double with all values in the list
+* @param threshold is used for calculating the fraction larger
+*/
+double Tools::FractionLargerThanThreshold(const std::vector<double> &values, double threshold) {
+  
+  if (values.size() == 0) {
+    return 0.0;
+  }
+
+  double counter = 0;
+  for (size_t i = 0; i < values.size(); ++i) {
+    if (values[i] > threshold) {
+      counter += 1.0;
+    }
+  }
+  return counter / values.size();
+
+}

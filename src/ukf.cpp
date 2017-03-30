@@ -15,11 +15,11 @@ UKF::UKF() {
   use_radar_ = true;
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 0.5; //30;
+  std_a_ = 0.5; // 7.5;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 0.5; // 30;
-
+  std_yawdd_ = 0.5; // 0.8;
+  
   // Laser measurement noise standard deviation position1 in m
   std_laspx_ = 0.15;
 
@@ -135,8 +135,14 @@ void UKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     previous_timestamp_ = measurement_pack.timestamp_;
 
     // Predict the new state based on dt - same for both laser and radar
+    // limit delta_t to 0.1 seconds for prediction phase
     try {
-      Prediction(dt);
+      double delta_t = dt;
+      while (delta_t > 0.1) {
+        Prediction(0.1);
+        delta_t -= 0.1;
+      }
+      Prediction(delta_t);
     }
     catch (std::range_error e) {
       // If convariance matrix is non positive definite (because of numerical instability),
@@ -145,8 +151,7 @@ void UKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       // Redo prediction using the current measurement
       // We don't get exception this time, because initial P (identity) is positive definite.
       Prediction(dt);
-    }
-   
+    }   
 
     //  Update - Use the sensor type to perform the update step - Update the state and covariance matrices.
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
@@ -163,7 +168,6 @@ void UKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   // set previous_measurement
   previous_measurement_ = measurement_pack;
-
 
 }
 

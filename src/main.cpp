@@ -163,20 +163,16 @@ int main(int argc, char* argv[]) {
       // add calculated NIS value to the list
       list_NIS_laser_.push_back(ukf.NIS_laser_);
       // output the estimation
-      out_file_ << "L" << "\t";
       out_file_ << measurement_pack_list[k].raw_measurements_(0) << "\t"; // p1_meas
       out_file_ << measurement_pack_list[k].raw_measurements_(1) << "\t"; // p2_meas
-      out_file_ << ukf.NIS_laser_ << "\t"; // NIS value
     } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
       // add calculated NIS value to the list
       list_NIS_radar_.push_back(ukf.NIS_radar_);
       // output the estimation in the cartesian coordinates
       double ro = measurement_pack_list[k].raw_measurements_(0);
       double phi = measurement_pack_list[k].raw_measurements_(1);
-      out_file_ << "R" << "\t";
       out_file_ << ro * cos(phi) << "\t"; // p1_meas
       out_file_ << ro * sin(phi) << "\t"; // p2_meas
-      out_file_ << ukf.NIS_radar_ << "\t"; // NIS value
     }
 
     // output the ground truth packages
@@ -188,6 +184,18 @@ int main(int argc, char* argv[]) {
     //
     estimations.push_back(ukf.x_);
     ground_truth.push_back(gt_pack_list[k].gt_values_);
+  }
+
+  // output the NIS measurements for laser
+  out_file_ << "NIS values for laser: " << endl;
+  for (size_t k = 0; k < list_NIS_laser_.size(); ++k) {
+    out_file_ << k << "\t" << list_NIS_laser_[k] << endl;
+  }
+
+  // output the NIS measurements for radar
+  out_file_ << "NIS values for radar: " << endl;
+  for (size_t k = 0; k < list_NIS_radar_.size(); ++k) {
+    out_file_ << k << "\t" << list_NIS_radar_[k] << endl;
   }
 
   // compute the accuracy (RMSE)
@@ -202,6 +210,12 @@ int main(int argc, char* argv[]) {
   if (in_file_.is_open()) {
     in_file_.close();
   }
+
+  // output NIS fraction over 95% confidence
+  double radar_threshold = 7.815;
+  double laser_threshold = 5.991;
+  cout << "Radar (3 DOF): 95% threshold = " << radar_threshold << " - NIS fraction over threshold = " << tools.FractionLargerThanThreshold(list_NIS_radar_, radar_threshold) << endl;
+  cout << "Laser (2 DOF): 95% threshold = " << laser_threshold << " - NIS fraction over threshold = " << tools.FractionLargerThanThreshold(list_NIS_laser_, laser_threshold) << endl;
 
   cout << "Done!" << endl;
   return 0;
